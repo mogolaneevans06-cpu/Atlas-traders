@@ -1,0 +1,14 @@
+<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MarketSignal AI Live</title>
+<style>
+body{margin:0;background:#0b1020;color:#fff;font:15px system-ui;padding:20px}header{display:flex;justify-content:space-between}.logo{font-size:22px;font-weight:800}.logo span{color:#35d07f}button,select{background:#18223a;color:#fff;border:1px solid #263452;border-radius:10px;padding:10px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}.card{background:#121a2e;border:1px solid #263452;border-radius:16px;padding:16px}.price{font-size:26px;font-weight:800;margin:12px 0}.muted{color:#9ca8bf;font-size:12px}.sig{padding:6px 10px;border-radius:20px;font-weight:800}.BUY{background:#123c2a;color:#35d07f}.SELL{background:#451d25;color:#ff5d6c}.WAIT{background:#423718;color:#f4c95d}.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}.level{background:#0d1426;padding:8px;border-radius:8px}.level small{display:block;color:#9ca8bf;font-size:10px}
+</style>
+<header><div class="logo">Market<span>Signal</span> AI</div><button onclick="load()">↻ Refresh</button></header>
+<h1>Live Multi‑Market Dashboard</h1><select id="f" onchange="load()"><option value="all">All markets</option><option value="forex">Forex</option><option value="metals">Gold</option><option value="crypto">Crypto</option><option value="indices">Indices</option></select>
+<p id="status" class="muted">Connecting…</p><div id="cards" class="grid"></div>
+<script>
+const A=[["EUR/USD","forex"],["GBP/USD","forex"],["USD/JPY","forex"],["XAU/USD","metals"],["BTC/USD","crypto"],["ETH/USD","crypto"],["US500","indices"],["NAS100","indices"]];
+function fmt(x){return Number(x).toLocaleString(undefined,{maximumFractionDigits:Number(x)<10?5:2})}
+async function load(){let a=A.filter(x=>f.value=="all"||x[1]==f.value);status.textContent="Loading live quotes…";try{let r=await fetch("/api/quotes?symbols="+encodeURIComponent(a.map(x=>x[0]).join(",")));if(!r.ok)throw 0;let d=await r.json();cards.innerHTML=a.map(x=>{let q=d[x[0]]||{},p=+q.price||0,c=+q.percent_change||0,s=c>.12?"BUY":c<-.12?"SELL":"WAIT",dir=s=="SELL"?-1:1,dist=p*(x[1]=="crypto"?.004:x[1]=="metals"?.003:x[1]=="indices"?.0025:.0018);return `<div class=card><b>${x[0]}</b> <span class="sig ${s}">${s}</span><div class=price>${fmt(p)}</div><div class=muted>Change ${c.toFixed(3)}% • live quote</div><div class=levels><div class=level><small>ENTRY</small>${fmt(p)}</div><div class=level><small>STOP</small>${fmt(p-dir*dist)}</div><div class=level><small>TP1</small>${fmt(p+dir*dist*1.7)}</div></div><div class=level style="margin-top:6px"><small>TP2</small>${fmt(p+dir*dist*2.8)}</div></div>`}).join("");status.textContent="● Live data connected"}catch(e){status.textContent="Live data is not configured. Add the server API key, then refresh."}}
+load();setInterval(load,60000);
+</script>

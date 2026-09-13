@@ -1,2 +1,1 @@
-# Atlas-traders
-AI-powered multi-market trading analysis app for Forex, Gold, Crypto, and Indices.
+Set TWELVE_DATA_API_KEY on the server, install requirements, then run python server.py. The browser never receives the API key.
